@@ -3,18 +3,14 @@
   <section
     ref="rootElement"
     class="vcb"
-    :class="{ 'vcb_disabled': disabled }"
+    :class="{ vcb_disabled: disabled }"
     :data-theme="resolvedTheme"
     :aria-label="ariaLabel"
   >
     <header v-if="showHeader || $slots.actions" class="vcb__header">
       <div v-if="showHeader" class="vcb__meta">
-        <span v-if="filename" class="vcb__filename">{{
-          filename
-        }}</span>
-        <span class="vcb__language"
-          >{{ languageLabel }}: {{ language }}</span
-        >
+        <span v-if="filename" class="vcb__filename">{{ filename }}</span>
+        <span class="vcb__language">{{ languageLabel }}: {{ language }}</span>
       </div>
       <div class="vcb__actions">
         <slot name="actions" />
@@ -32,7 +28,7 @@
 
     <pre
       class="vcb__pre"
-      :class="{ 'vcb__pre_wrap': wrap }"
+      :class="{ vcb__pre_wrap: wrap }"
       :style="preStyle"
     ><code><span
             v-for="(line, index) in lines"
@@ -201,8 +197,7 @@ onBeforeUnmount(() => {
 .vcb {
   display: grid;
   gap: var(--vcb-gap, 0);
-  border: 1px solid
-    var(--vcb-border-color, var(--vf-color-border, #d9dde3));
+  border: 1px solid var(--vcb-border-color, var(--vf-color-border, #d9dde3));
   border-radius: var(
     --vcb-border-radius,
     var(--vf-radius-surface, var(--vf-radius, 0.625rem))
@@ -280,7 +275,10 @@ onBeforeUnmount(() => {
 
 .vcb__pre {
   margin: 0;
-  padding: var(--vcb-padding, var(--vf-prose-code-block-padding, 0.75rem 0.9rem));
+  padding: var(
+    --vcb-padding,
+    var(--vf-prose-code-block-padding, 0.75rem 0.9rem)
+  );
   overflow: auto;
   white-space: pre;
 }
@@ -412,10 +410,7 @@ onBeforeUnmount(() => {
     --vcb-dark-token-number-color,
     var(--vf-color-warn, #d7ba7d)
   );
-  --vcb-token-comment-color: var(
-    --vcb-dark-token-comment-color,
-    #6a9955
-  );
+  --vcb-token-comment-color: var(--vcb-dark-token-comment-color, #6a9955);
   --vcb-token-variable-color: var(
     --vcb-dark-token-variable-color,
     var(--vf-color-text, #d4d4d4)
@@ -432,30 +427,15 @@ onBeforeUnmount(() => {
     --vcb-dark-token-component-color,
     var(--vf-color-info, #4ec9b0)
   );
-  --vcb-token-attribute-color: var(
-    --vcb-dark-token-attribute-color,
-    #9cdcfe
-  );
-  --vcb-token-directive-color: var(
-    --vcb-dark-token-directive-color,
-    #c586c0
-  );
-  --vcb-token-identifier-color: var(
-    --vcb-dark-token-identifier-color,
-    #9cdcfe
-  );
+  --vcb-token-attribute-color: var(--vcb-dark-token-attribute-color, #9cdcfe);
+  --vcb-token-directive-color: var(--vcb-dark-token-directive-color, #c586c0);
+  --vcb-token-identifier-color: var(--vcb-dark-token-identifier-color, #9cdcfe);
   --vcb-token-function-color: var(
     --vcb-dark-token-function-color,
     var(--vf-color-contrast, #dcdcaa)
   );
-  --vcb-token-property-color: var(
-    --vcb-dark-token-property-color,
-    #9cdcfe
-  );
-  --vcb-token-operator-color: var(
-    --vcb-dark-token-operator-color,
-    #d4d4d4
-  );
+  --vcb-token-property-color: var(--vcb-dark-token-property-color, #9cdcfe);
+  --vcb-token-operator-color: var(--vcb-dark-token-operator-color, #d4d4d4);
 }
 
 .vcb_disabled {

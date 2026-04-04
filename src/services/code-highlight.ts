@@ -124,10 +124,7 @@ const highlightMarkupAttributes = (value: string) =>
         attributeValue
           ? isVueDirectiveAttribute(attributeName)
             ? highlightDirectiveExpressionValue(attributeValue)
-            : wrapToken(
-                "vcb__token_string",
-                escapeCodeHtml(attributeValue),
-              )
+            : wrapToken("vcb__token_string", escapeCodeHtml(attributeValue))
           : ""
       }`,
   );
@@ -278,30 +275,18 @@ const highlightJsLike = (line: string) => {
     html += escapeCodeHtml(line.slice(cursor, index));
 
     if (match[1]) {
-      html += wrapToken(
-        "vcb__token_comment",
-        escapeCodeHtml(fullMatch),
-      );
+      html += wrapToken("vcb__token_comment", escapeCodeHtml(fullMatch));
     } else if (match[2]) {
       html +=
         fullMatch.startsWith("`") && fullMatch.includes("${")
           ? highlightTemplateLiteral(fullMatch)
           : wrapToken("vcb__token_string", escapeCodeHtml(fullMatch));
     } else if (match[4]) {
-      html += wrapToken(
-        "vcb__token_keyword",
-        escapeCodeHtml(fullMatch),
-      );
+      html += wrapToken("vcb__token_keyword", escapeCodeHtml(fullMatch));
     } else if (match[5]) {
-      html += wrapToken(
-        "vcb__token_operator",
-        escapeCodeHtml(fullMatch),
-      );
+      html += wrapToken("vcb__token_operator", escapeCodeHtml(fullMatch));
     } else if (/^\d/.test(fullMatch)) {
-      html += wrapToken(
-        "vcb__token_number",
-        escapeCodeHtml(fullMatch),
-      );
+      html += wrapToken("vcb__token_number", escapeCodeHtml(fullMatch));
     } else {
       html += wrapToken(
         classifyJsIdentifier(line, fullMatch, index),
@@ -414,25 +399,13 @@ const highlightBash = (line: string) => {
       if (match[1]) {
         html += escapeCodeHtml(fullMatch);
       } else if (match[2]) {
-        html += wrapToken(
-          "vcb__token_string",
-          escapeCodeHtml(fullMatch),
-        );
+        html += wrapToken("vcb__token_string", escapeCodeHtml(fullMatch));
       } else if (match[4]) {
-        html += wrapToken(
-          "vcb__token_variable",
-          escapeCodeHtml(fullMatch),
-        );
+        html += wrapToken("vcb__token_variable", escapeCodeHtml(fullMatch));
       } else if (match[5]) {
-        html += wrapToken(
-          "vcb__token_string",
-          escapeCodeHtml(fullMatch),
-        );
+        html += wrapToken("vcb__token_string", escapeCodeHtml(fullMatch));
       } else if (match[6]) {
-        html += wrapToken(
-          "vcb__token_directive",
-          escapeCodeHtml(match[6]),
-        );
+        html += wrapToken("vcb__token_directive", escapeCodeHtml(match[6]));
         if (match[7]) {
           html += `${escapeCodeHtml("=")}${wrapToken(
             match[7].startsWith("@") || match[7].includes("/")
@@ -442,10 +415,7 @@ const highlightBash = (line: string) => {
           )}`;
         }
       } else if (match[8]) {
-        html += wrapToken(
-          "vcb__token_variable",
-          escapeCodeHtml(fullMatch),
-        );
+        html += wrapToken("vcb__token_variable", escapeCodeHtml(fullMatch));
       } else {
         html += escapeCodeHtml(fullMatch);
       }
@@ -491,25 +461,13 @@ const highlightBash = (line: string) => {
     html += escapeCodeHtml(line.slice(cursor, index));
 
     if (match[1]) {
-      html += wrapToken(
-        "vcb__token_comment",
-        escapeCodeHtml(fullMatch),
-      );
+      html += wrapToken("vcb__token_comment", escapeCodeHtml(fullMatch));
     } else if (match[2]) {
-      html += wrapToken(
-        "vcb__token_string",
-        escapeCodeHtml(fullMatch),
-      );
+      html += wrapToken("vcb__token_string", escapeCodeHtml(fullMatch));
     } else if (match[4]) {
-      html += wrapToken(
-        "vcb__token_variable",
-        escapeCodeHtml(fullMatch),
-      );
+      html += wrapToken("vcb__token_variable", escapeCodeHtml(fullMatch));
     } else if (match[5]) {
-      html += wrapToken(
-        "vcb__token_string",
-        escapeCodeHtml(fullMatch),
-      );
+      html += wrapToken("vcb__token_string", escapeCodeHtml(fullMatch));
     } else if (match[6]) {
       html += wrapToken(
         "vcb__token_keyword",
@@ -547,40 +505,19 @@ const highlightCssValues = (value: string) => {
     html += escapeCodeHtml(value.slice(cursor, index));
 
     if (match[1]) {
-      html += wrapToken(
-        "vcb__token_comment",
-        escapeCodeHtml(fullMatch),
-      );
+      html += wrapToken("vcb__token_comment", escapeCodeHtml(fullMatch));
     } else if (match[2]) {
-      html += wrapToken(
-        "vcb__token_string",
-        escapeCodeHtml(fullMatch),
-      );
+      html += wrapToken("vcb__token_string", escapeCodeHtml(fullMatch));
     } else if (/^#[0-9A-Fa-f]{3,8}$/.test(fullMatch)) {
-      html += wrapToken(
-        "vcb__token_number",
-        escapeCodeHtml(fullMatch),
-      );
+      html += wrapToken("vcb__token_number", escapeCodeHtml(fullMatch));
     } else if (fullMatch.startsWith("@")) {
-      html += wrapToken(
-        "vcb__token_keyword",
-        escapeCodeHtml(fullMatch),
-      );
+      html += wrapToken("vcb__token_keyword", escapeCodeHtml(fullMatch));
     } else if (readNextNonWhitespace(value, index + fullMatch.length) === "(") {
-      html += wrapToken(
-        "vcb__token_function",
-        escapeCodeHtml(fullMatch),
-      );
+      html += wrapToken("vcb__token_function", escapeCodeHtml(fullMatch));
     } else if (/^-?\d/.test(fullMatch)) {
-      html += wrapToken(
-        "vcb__token_number",
-        escapeCodeHtml(fullMatch),
-      );
+      html += wrapToken("vcb__token_number", escapeCodeHtml(fullMatch));
     } else {
-      html += wrapToken(
-        "vcb__token_variable",
-        escapeCodeHtml(fullMatch),
-      );
+      html += wrapToken("vcb__token_variable", escapeCodeHtml(fullMatch));
     }
 
     cursor = index + fullMatch.length;
@@ -800,9 +737,7 @@ const highlightMarkupBlock = (code: string, highlight: boolean): string => {
           const directive = isVueDirectiveAttribute(attributeName);
           const closingQuoteIndex = initialValue.indexOf(quote);
           const openingHtml = `${whitespace}${wrapToken(
-            directive
-              ? "vcb__token_directive"
-              : "vcb__token_attribute",
+            directive ? "vcb__token_directive" : "vcb__token_attribute",
             attributeName,
           )}${escapeCodeHtml(equals)}`;
 
