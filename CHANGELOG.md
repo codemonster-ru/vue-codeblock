@@ -1,8 +1,18 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+## [1.1.0] - 2026-04-04
 
-The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
+### Added
+
+- Support for inherited theme detection from the nearest `data-vf-theme` ancestor when `theme="inherit"` is used
+- Test coverage for inherited theme resolution via `data-theme`, `data-vf-theme`, fallback light mode, and explicit `light` / `dark` modes
+
+### Changed
+
+- Kept inherited theme priority as nearest `data-theme`, then nearest `data-vf-theme`, then fallback `light`
+- Updated the built-in default light and dark code block palette to better match the current VueForge visual language
+- Mapped default `CodeBlock` CSS variables to available `--vf-*` theme tokens with local fallbacks so the component stays fully standalone outside VueForge
+- Documented `theme="inherit"` support for both `data-theme` and `data-vf-theme`
 
 ## [1.0.0] - 2026-03-01
 

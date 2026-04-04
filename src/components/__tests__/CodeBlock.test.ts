@@ -1,6 +1,32 @@
 import { mount } from "@vue/test-utils";
+import { nextTick } from "vue";
 import { vi } from "vitest";
 import CodeBlock from "../CodeBlock.vue";
+
+const flushObserver = async () => {
+  await nextTick();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+};
+
+const mountIntoHost = (
+  props: Record<string, unknown>,
+  hostAttributes: Record<string, string> = {},
+) => {
+  const host = document.createElement("div");
+
+  Object.entries(hostAttributes).forEach(([name, value]) => {
+    host.setAttribute(name, value);
+  });
+
+  document.body.appendChild(host);
+
+  const wrapper = mount(CodeBlock, {
+    attachTo: host,
+    props,
+  });
+
+  return { wrapper, host };
+};
 
 describe("CodeBlock", () => {
   it("renders highlighted TypeScript content and line numbers", () => {
@@ -117,14 +143,85 @@ body {
     vi.unstubAllGlobals();
   });
 
-  it("applies explicit dark theme marker on the root element", () => {
+  it("inherits dark theme from the closest data-theme ancestor", async () => {
+    const { wrapper } = mountIntoHost(
+      {
+        code: "const demo = true;",
+        theme: "inherit",
+      },
+      { "data-theme": "dark" },
+    );
+
+    await flushObserver();
+
+    expect(wrapper.attributes("data-theme")).toBe("dark");
+    wrapper.unmount();
+  });
+
+  it("inherits dark theme from data-vf-theme when data-theme is absent", async () => {
+    const { wrapper } = mountIntoHost(
+      {
+        code: "const demo = true;",
+        theme: "inherit",
+      },
+      { "data-vf-theme": "dark" },
+    );
+
+    await flushObserver();
+
+    expect(wrapper.attributes("data-theme")).toBe("dark");
+    wrapper.unmount();
+  });
+
+  it("falls back to light theme when no ancestor theme attributes are present", async () => {
+    const { wrapper } = mountIntoHost({
+      code: "const demo = true;",
+      theme: "inherit",
+    });
+
+    await flushObserver();
+
+    expect(wrapper.attributes("data-theme")).toBe("light");
+    wrapper.unmount();
+  });
+
+  it.each(["dark", "light"] as const)(
+    "keeps explicit theme=%s unchanged",
+    async (theme) => {
+      const { wrapper } = mountIntoHost(
+        {
+          code: "const demo = true;",
+          theme,
+        },
+        { "data-vf-theme": theme === "dark" ? "light" : "dark" },
+      );
+
+      await flushObserver();
+
+      expect(wrapper.attributes("data-theme")).toBe(theme);
+      wrapper.unmount();
+    },
+  );
+
+  it("prioritizes data-theme over data-vf-theme in inherit mode", async () => {
+    const outer = document.createElement("div");
+    outer.setAttribute("data-vf-theme", "dark");
+    const host = document.createElement("div");
+    host.setAttribute("data-theme", "light");
+    outer.appendChild(host);
+    document.body.appendChild(outer);
+
     const wrapper = mount(CodeBlock, {
+      attachTo: host,
       props: {
         code: "const demo = true;",
-        theme: "dark",
+        theme: "inherit",
       },
     });
 
-    expect(wrapper.attributes("data-theme")).toBe("dark");
+    await flushObserver();
+
+    expect(wrapper.attributes("data-theme")).toBe("light");
+    wrapper.unmount();
   });
 });

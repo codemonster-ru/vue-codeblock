@@ -115,7 +115,7 @@ The component ships with light and dark defaults. You can override it with:
 
 - `theme="light"`
 - `theme="dark"`
-- `theme="inherit"` and an ancestor `data-theme="dark"`
+- `theme="inherit"` and the nearest ancestor theme from `data-theme` or, if absent, `data-vf-theme`
 
 Main CSS custom properties:
 

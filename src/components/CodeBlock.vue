@@ -1,6 +1,7 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
   <section
+    ref="rootElement"
     class="vcb"
     :class="{ 'vcb_disabled': disabled }"
     :data-theme="resolvedTheme"
@@ -45,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { highlightCodeBlock } from "../services/code-highlight";
 import type { CodeBlockCopyPayload, CodeBlockProps } from "../types";
 
@@ -75,7 +76,10 @@ const emits = defineEmits<{
 }>();
 
 const copied = ref(false);
+const rootElement = ref<HTMLElement | null>(null);
+const inheritedTheme = ref<"light" | "dark">("light");
 let copiedTimer: ReturnType<typeof setTimeout> | null = null;
+let themeObserver: MutationObserver | null = null;
 
 const normalizedCode = computed(() => props.code.replace(/\r\n/g, "\n"));
 const lines = computed(() => {
@@ -94,7 +98,7 @@ const renderedLines = computed(() =>
   ).split("\n"),
 );
 const resolvedTheme = computed(() =>
-  props.theme === "inherit" ? undefined : props.theme,
+  props.theme === "inherit" ? inheritedTheme.value : props.theme,
 );
 
 const preStyle = computed(() => {
@@ -130,10 +134,65 @@ const copyCode = async () => {
   }
 };
 
+const normalizeThemeValue = (value: string | null) =>
+  value === "dark" ? "dark" : "light";
+
+const findClosestThemeValue = (
+  element: HTMLElement | null,
+  attributeName: "data-theme" | "data-vf-theme",
+) => {
+  let currentElement = element?.parentElement ?? null;
+
+  while (currentElement) {
+    if (currentElement.hasAttribute(attributeName)) {
+      return normalizeThemeValue(currentElement.getAttribute(attributeName));
+    }
+
+    currentElement = currentElement.parentElement;
+  }
+
+  return null;
+};
+
+const syncInheritedTheme = () => {
+  if (props.theme !== "inherit") {
+    return;
+  }
+
+  inheritedTheme.value =
+    findClosestThemeValue(rootElement.value, "data-theme") ??
+    findClosestThemeValue(rootElement.value, "data-vf-theme") ??
+    "light";
+};
+
+onMounted(() => {
+  syncInheritedTheme();
+
+  if (typeof MutationObserver === "undefined" || !rootElement.value) {
+    return;
+  }
+
+  themeObserver = new MutationObserver(() => {
+    syncInheritedTheme();
+  });
+
+  themeObserver.observe(document.documentElement, {
+    subtree: true,
+    childList: true,
+    attributes: true,
+    attributeFilter: ["data-theme", "data-vf-theme"],
+  });
+});
+
 onBeforeUnmount(() => {
   if (copiedTimer) {
     clearTimeout(copiedTimer);
     copiedTimer = null;
+  }
+
+  if (themeObserver) {
+    themeObserver.disconnect();
+    themeObserver = null;
   }
 });
 </script>
@@ -142,23 +201,30 @@ onBeforeUnmount(() => {
 .vcb {
   display: grid;
   gap: var(--vcb-gap, 0);
-  border: 1px solid var(--vcb-border-color, #cbd5e1);
-  border-radius: var(--vcb-border-radius, 0.625rem);
-  background: var(--vcb-background-color, #f8fbff);
-  color: var(--vcb-text-color, #0f172a);
+  border: 1px solid
+    var(--vcb-border-color, var(--vf-color-border, #d9dde3));
+  border-radius: var(
+    --vcb-border-radius,
+    var(--vf-radius-surface, var(--vf-radius, 0.625rem))
+  );
+  background: var(--vcb-background-color, var(--vf-color-surface, #ffffff));
+  color: var(--vcb-text-color, var(--vf-color-text, #1f232b));
   font-family: var(
     --vcb-font-family,
-    ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    Monaco,
-    Consolas,
-    "Liberation Mono",
-    "Courier New",
-    monospace
+    var(
+      --vf-font-family-mono,
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Monaco,
+      Consolas,
+      "Liberation Mono",
+      "Courier New",
+      monospace
+    )
   );
-  font-size: var(--vcb-font-size, 0.8125rem);
-  line-height: var(--vcb-line-height, 1.5);
+  font-size: var(--vcb-font-size, var(--vf-font-size-sm, 0.8125rem));
+  line-height: var(--vcb-line-height, var(--vf-line-height-normal, 1.5));
 }
 
 .vcb__header {
@@ -168,20 +234,23 @@ onBeforeUnmount(() => {
   gap: var(--vcb-header-gap, 0.75rem);
   padding: var(--vcb-header-padding, 0.55rem 0.75rem);
   border-bottom: 1px solid
-    var(--vcb-header-border-color, rgba(148, 163, 184, 0.28));
+    var(--vcb-header-border-color, var(--vf-color-border, #d9dde3));
 }
 
 .vcb__meta {
   display: inline-flex;
   align-items: center;
   gap: var(--vcb-meta-gap, 0.55rem);
-  color: var(--vcb-meta-color, #475569);
-  font-size: var(--vcb-meta-font-size, 0.75rem);
+  color: var(--vcb-meta-color, var(--vf-color-muted, #616773));
+  font-size: var(--vcb-meta-font-size, var(--vf-font-size-sm, 0.75rem));
 }
 
 .vcb__filename {
-  color: var(--vcb-filename-color, #0f172a);
-  font-weight: var(--vcb-filename-font-weight, 600);
+  color: var(--vcb-filename-color, var(--vf-color-text, #1f232b));
+  font-weight: var(
+    --vcb-filename-font-weight,
+    var(--vf-font-weight-semibold, 600)
+  );
 }
 
 .vcb__actions {
@@ -192,17 +261,26 @@ onBeforeUnmount(() => {
 
 .vcb__copy {
   border: 1px solid
-    var(--vcb-action-border-color, rgba(148, 163, 184, 0.38));
-  border-radius: var(--vcb-action-border-radius, 0.375rem);
-  background: var(--vcb-action-background-color, #ffffff);
-  color: var(--vcb-action-text-color, #0f172a);
-  padding: var(--vcb-action-padding, 0.2rem 0.55rem);
-  font-size: var(--vcb-action-font-size, 0.75rem);
+    var(--vcb-action-border-color, var(--vf-color-border, #d9dde3));
+  border-radius: var(
+    --vcb-action-border-radius,
+    var(--vf-radius-control-tight, 0.375rem)
+  );
+  background: var(
+    --vcb-action-background-color,
+    var(--vf-color-surface-muted, #f3f3f3)
+  );
+  color: var(--vcb-action-text-color, var(--vf-color-text, #1f232b));
+  padding: var(
+    --vcb-action-padding,
+    var(--vf-button-padding-sm, 0.2rem 0.55rem)
+  );
+  font-size: var(--vcb-action-font-size, var(--vf-font-size-sm, 0.75rem));
 }
 
 .vcb__pre {
   margin: 0;
-  padding: var(--vcb-padding, 0.75rem 0.9rem);
+  padding: var(--vcb-padding, var(--vf-prose-code-block-padding, 0.75rem 0.9rem));
   overflow: auto;
   white-space: pre;
 }
@@ -220,7 +298,7 @@ onBeforeUnmount(() => {
 
 .vcb__line-number {
   text-align: right;
-  color: var(--vcb-line-number-color, #64748b);
+  color: var(--vcb-line-number-color, var(--vf-color-muted, #616773));
   min-width: var(--vcb-line-number-min-width, 2.1rem);
   user-select: none;
 }
@@ -230,59 +308,59 @@ onBeforeUnmount(() => {
 }
 
 .vcb__token_keyword {
-  color: var(--vcb-token-keyword-color, #8b2fc9);
+  color: var(--vcb-token-keyword-color, var(--vf-color-help, #8553a1));
 }
 
 .vcb__token_string {
-  color: var(--vcb-token-string-color, #0f7b45);
+  color: var(--vcb-token-string-color, var(--vf-color-success, #2e7d32));
 }
 
 .vcb__token_number {
-  color: var(--vcb-token-number-color, #c2410c);
+  color: var(--vcb-token-number-color, var(--vf-color-warn, #9f8400));
 }
 
 .vcb__token_comment {
-  color: var(--vcb-token-comment-color, #64748b);
+  color: var(--vcb-token-comment-color, var(--vf-color-muted, #616773));
 }
 
 .vcb__token_variable {
-  color: var(--vcb-token-variable-color, #0f4c81);
+  color: var(--vcb-token-variable-color, var(--vf-color-text, #1f232b));
 }
 
 .vcb__token_identifier {
-  color: var(--vcb-token-identifier-color, #0369a1);
+  color: var(--vcb-token-identifier-color, var(--vf-color-info, #0069ba));
 }
 
 .vcb__token_function {
-  color: var(--vcb-token-function-color, #1d4ed8);
+  color: var(--vcb-token-function-color, var(--vf-color-primary, #0e639c));
 }
 
 .vcb__token_property {
-  color: var(--vcb-token-property-color, #6d28d9);
+  color: var(--vcb-token-property-color, var(--vf-color-primary, #0e639c));
 }
 
 .vcb__token_operator {
-  color: var(--vcb-token-operator-color, #be185d);
+  color: var(--vcb-token-operator-color, var(--vf-color-danger, #c72e39));
 }
 
 .vcb__token_tag {
-  color: var(--vcb-token-tag-color, #0f4c81);
+  color: var(--vcb-token-tag-color, var(--vf-color-primary, #0e639c));
 }
 
 .vcb__token_selector {
-  color: var(--vcb-token-selector-color, #0f4c81);
+  color: var(--vcb-token-selector-color, var(--vf-color-primary, #0e639c));
 }
 
 .vcb__token_component {
-  color: var(--vcb-token-component-color, #0369a1);
+  color: var(--vcb-token-component-color, var(--vf-color-info, #0069ba));
 }
 
 .vcb__token_attribute {
-  color: var(--vcb-token-attribute-color, #7c3aed);
+  color: var(--vcb-token-attribute-color, var(--vf-color-help, #8553a1));
 }
 
 .vcb__token_directive {
-  color: var(--vcb-token-directive-color, #a21caf);
+  color: var(--vcb-token-directive-color, var(--vf-color-help, #8553a1));
 }
 
 .vcb[data-theme="dark"],
@@ -290,93 +368,93 @@ onBeforeUnmount(() => {
 [data-theme="dark"] .vcb:not([data-theme="light"]) {
   --vcb-background-color: var(
     --vcb-dark-background-color,
-    #0a1425
+    var(--vf-color-surface, #252526)
   );
-  --vcb-text-color: var(--vcb-dark-text-color, #e2e8f0);
+  --vcb-text-color: var(--vcb-dark-text-color, var(--vf-color-text, #d4d4d4));
   --vcb-border-color: var(
     --vcb-dark-border-color,
-    rgba(148, 163, 184, 0.35)
+    var(--vf-color-border, #3c3c3c)
   );
   --vcb-header-border-color: var(
     --vcb-dark-header-border-color,
-    rgba(148, 163, 184, 0.35)
+    var(--vf-color-border, #3c3c3c)
   );
-  --vcb-meta-color: var(--vcb-dark-meta-color, #93a4bf);
+  --vcb-meta-color: var(--vcb-dark-meta-color, var(--vf-color-muted, #9da0a6));
   --vcb-filename-color: var(
     --vcb-dark-filename-color,
-    #e2e8f0
+    var(--vf-color-text, #d4d4d4)
   );
   --vcb-action-border-color: var(
     --vcb-dark-action-border-color,
-    rgba(148, 163, 184, 0.45)
+    var(--vf-color-border, #3c3c3c)
   );
   --vcb-action-background-color: var(
     --vcb-dark-action-background-color,
-    rgba(15, 23, 42, 0.7)
+    var(--vf-color-surface-muted, #2d2d30)
   );
   --vcb-action-text-color: var(
     --vcb-dark-action-text-color,
-    #e2e8f0
+    var(--vf-color-text, #d4d4d4)
   );
   --vcb-line-number-color: var(
     --vcb-dark-line-number-color,
-    #64748b
+    var(--vf-color-muted, #9da0a6)
   );
   --vcb-token-keyword-color: var(
     --vcb-dark-token-keyword-color,
-    #c084fc
+    var(--vf-color-help, #c586c0)
   );
   --vcb-token-string-color: var(
     --vcb-dark-token-string-color,
-    #86efac
+    var(--vf-color-success, #6a9955)
   );
   --vcb-token-number-color: var(
     --vcb-dark-token-number-color,
-    #fca5a5
+    var(--vf-color-warn, #d7ba7d)
   );
   --vcb-token-comment-color: var(
     --vcb-dark-token-comment-color,
-    #94a3b8
+    #6a9955
   );
   --vcb-token-variable-color: var(
     --vcb-dark-token-variable-color,
-    #bfdbfe
+    var(--vf-color-text, #d4d4d4)
   );
   --vcb-token-tag-color: var(
     --vcb-dark-token-tag-color,
-    #93c5fd
+    var(--vf-color-primary, #569cd6)
   );
   --vcb-token-selector-color: var(
     --vcb-dark-token-selector-color,
-    #93c5fd
+    var(--vf-color-warn, #d7ba7d)
   );
   --vcb-token-component-color: var(
     --vcb-dark-token-component-color,
-    #67e8f9
+    var(--vf-color-info, #4ec9b0)
   );
   --vcb-token-attribute-color: var(
     --vcb-dark-token-attribute-color,
-    #c4b5fd
+    #9cdcfe
   );
   --vcb-token-directive-color: var(
     --vcb-dark-token-directive-color,
-    #f0abfc
+    #c586c0
   );
   --vcb-token-identifier-color: var(
     --vcb-dark-token-identifier-color,
-    #7dd3fc
+    #9cdcfe
   );
   --vcb-token-function-color: var(
     --vcb-dark-token-function-color,
-    #93c5fd
+    var(--vf-color-contrast, #dcdcaa)
   );
   --vcb-token-property-color: var(
     --vcb-dark-token-property-color,
-    #a5b4fc
+    #9cdcfe
   );
   --vcb-token-operator-color: var(
     --vcb-dark-token-operator-color,
-    #f0abfc
+    #d4d4d4
   );
 }
 
