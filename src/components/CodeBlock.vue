@@ -197,12 +197,23 @@ onBeforeUnmount(() => {
 .vcb {
   display: grid;
   gap: var(--vcb-gap, 0);
-  border: 1px solid var(--vcb-border-color, var(--vf-color-border, #d9dde3));
+  border: 1px solid
+    var(
+      --vcb-border-color,
+      color-mix(
+        in srgb,
+        var(--vf-color-border, rgba(15, 23, 42, 0.12)) 92%,
+        #cbd5e1
+      )
+    );
   border-radius: var(
     --vcb-border-radius,
-    var(--vf-radius-surface, var(--vf-radius, 0.625rem))
+    var(
+      --vf-radius-control,
+      var(--vf-radius-surface, var(--vf-radius, 0.625rem))
+    )
   );
-  background: var(--vcb-background-color, var(--vf-color-surface, #ffffff));
+  background: var(--vcb-background-color, var(--vf-color-bg, #ffffff));
   color: var(--vcb-text-color, var(--vf-color-text, #1f232b));
   font-family: var(
     --vcb-font-family,
@@ -220,6 +231,7 @@ onBeforeUnmount(() => {
   );
   font-size: var(--vcb-font-size, var(--vf-font-size-sm, 0.8125rem));
   line-height: var(--vcb-line-height, var(--vf-line-height-normal, 1.5));
+  overflow: hidden;
 }
 
 .vcb__header {
@@ -227,9 +239,22 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: space-between;
   gap: var(--vcb-header-gap, 0.75rem);
-  padding: var(--vcb-header-padding, 0.55rem 0.75rem);
+  min-height: 0;
+  padding: var(--vcb-header-padding, 0.4rem 0.75rem);
   border-bottom: 1px solid
-    var(--vcb-header-border-color, var(--vf-color-border, #d9dde3));
+    var(
+      --vcb-header-border-color,
+      color-mix(
+        in srgb,
+        var(--vf-color-border, rgba(15, 23, 42, 0.12)) 78%,
+        transparent
+      )
+    );
+  background: var(
+    --vcb-header-background-color,
+    var(--vcb-background-color, var(--vf-color-bg, #ffffff))
+  );
+  opacity: var(--vcb-header-opacity, 0.9);
 }
 
 .vcb__meta {
@@ -238,6 +263,7 @@ onBeforeUnmount(() => {
   gap: var(--vcb-meta-gap, 0.55rem);
   color: var(--vcb-meta-color, var(--vf-color-muted, #616773));
   font-size: var(--vcb-meta-font-size, var(--vf-font-size-sm, 0.75rem));
+  letter-spacing: 0;
 }
 
 .vcb__filename {
@@ -256,21 +282,27 @@ onBeforeUnmount(() => {
 
 .vcb__copy {
   border: 1px solid
-    var(--vcb-action-border-color, var(--vf-color-border, #d9dde3));
+    var(
+      --vcb-action-border-color,
+      color-mix(
+        in srgb,
+        var(--vf-color-border, rgba(15, 23, 42, 0.12)) 80%,
+        transparent
+      )
+    );
   border-radius: var(
     --vcb-action-border-radius,
     var(--vf-radius-control-tight, 0.375rem)
   );
-  background: var(
-    --vcb-action-background-color,
-    var(--vf-color-surface-muted, #f3f3f3)
-  );
+  background: var(--vcb-action-background-color, var(--vf-color-bg, #ffffff));
   color: var(--vcb-action-text-color, var(--vf-color-text, #1f232b));
-  padding: var(
-    --vcb-action-padding,
-    var(--vf-button-padding-sm, 0.2rem 0.55rem)
-  );
+  padding: var(--vcb-action-padding, 0.125rem 0.5rem);
   font-size: var(--vcb-action-font-size, var(--vf-font-size-sm, 0.75rem));
+  font-weight: var(
+    --vcb-action-font-weight,
+    var(--vf-text-body-font-weight, 400)
+  );
+  opacity: var(--vcb-action-opacity, 0.88);
 }
 
 .vcb__pre {
@@ -279,6 +311,7 @@ onBeforeUnmount(() => {
     --vcb-padding,
     var(--vf-prose-code-block-padding, 0.75rem 0.9rem)
   );
+  background: var(--vcb-code-background-color, transparent);
   overflow: auto;
   white-space: pre;
 }
@@ -366,16 +399,20 @@ onBeforeUnmount(() => {
 [data-theme="dark"] .vcb:not([data-theme="light"]) {
   --vcb-background-color: var(
     --vcb-dark-background-color,
-    var(--vf-color-surface, #252526)
+    var(--vf-color-bg, #1e1e1e)
   );
   --vcb-text-color: var(--vcb-dark-text-color, var(--vf-color-text, #d4d4d4));
   --vcb-border-color: var(
     --vcb-dark-border-color,
-    var(--vf-color-border, #3c3c3c)
+    color-mix(in srgb, var(--vf-color-border, #3c3c3c) 88%, black)
   );
   --vcb-header-border-color: var(
     --vcb-dark-header-border-color,
-    var(--vf-color-border, #3c3c3c)
+    color-mix(in srgb, var(--vf-color-border, #3c3c3c) 72%, transparent)
+  );
+  --vcb-header-background-color: var(
+    --vcb-dark-header-background-color,
+    transparent
   );
   --vcb-meta-color: var(--vcb-dark-meta-color, var(--vf-color-muted, #9da0a6));
   --vcb-filename-color: var(
@@ -384,11 +421,11 @@ onBeforeUnmount(() => {
   );
   --vcb-action-border-color: var(
     --vcb-dark-action-border-color,
-    var(--vf-color-border, #3c3c3c)
+    color-mix(in srgb, var(--vf-color-border, #3c3c3c) 76%, transparent)
   );
   --vcb-action-background-color: var(
     --vcb-dark-action-background-color,
-    var(--vf-color-surface-muted, #2d2d30)
+    color-mix(in srgb, var(--vf-color-surface, #252526) 72%, transparent)
   );
   --vcb-action-text-color: var(
     --vcb-dark-action-text-color,
@@ -436,6 +473,14 @@ onBeforeUnmount(() => {
   );
   --vcb-token-property-color: var(--vcb-dark-token-property-color, #9cdcfe);
   --vcb-token-operator-color: var(--vcb-dark-token-operator-color, #d4d4d4);
+}
+
+.vcb[data-theme="light"],
+:root:not([data-theme="dark"]) .vcb:not([data-theme="dark"]),
+[data-theme="light"] .vcb,
+[data-vf-theme="light"] .vcb,
+:root:not([data-vf-theme="dark"]) .vcb:not([data-theme="dark"]) {
+  box-shadow: var(--vcb-shadow, 0 1px 2px rgba(15, 23, 42, 0.04));
 }
 
 .vcb_disabled {

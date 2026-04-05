@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.1] - 2026-04-05
+
+### Changed
+
+- Refined the default surface styling so `CodeBlock` reads more like a documentation block and less like a heavy standalone widget
+- Expanded the theming docs with the new surface-related CSS custom properties and default styling notes
+- Refreshed the demo to better reflect VueForge-aligned default tokens and presentation
+
 ## [1.1.0] - 2026-04-04
 
 ### Added

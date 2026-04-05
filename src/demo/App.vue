@@ -3,15 +3,12 @@ import { computed, ref } from "vue";
 import { CodeBlock } from "../index";
 
 const exampleCode: string = [
-  '<script setup lang="ts">',
-  "import { ref } from 'vue';",
+  "import { createApp } from 'vue';",
+  "import VueForge from '@codemonster-ru/vueforge-core';",
+  "import '@codemonster-ru/vueforge-core/styles.css';",
+  "import '@codemonster-ru/vueforge-layouts/styles.css';",
   "",
-  "const clicks = ref(0);",
-  "</" + "script>",
-  "",
-  "<template>",
-  '    <button @click="clicks += 1">Clicked {{ clicks }} times</button>',
-  "</template>",
+  "createApp(App).use(VueForge).mount('#app');",
 ].join("\n");
 
 const theme = ref<"light" | "dark">("light");
@@ -41,10 +38,8 @@ const toggleTheme = () => {
     </div>
 
     <CodeBlock
-      language="vue"
-      filename="CounterButton.vue"
+      language="ts"
       :code="exampleCode"
-      :show-line-numbers="true"
       max-height="420px"
       :theme="theme"
     />
@@ -53,6 +48,27 @@ const toggleTheme = () => {
 
 <style scoped>
 .demo-page {
+  --vf-color-bg: #f6f8fb;
+  --vf-color-surface: #ffffff;
+  --vf-color-surface-muted: #f3f3f3;
+  --vf-color-text: #1f232b;
+  --vf-color-muted: #616773;
+  --vf-color-border: #d9dde3;
+  --vf-color-primary: #0e639c;
+  --vf-color-success: #2e7d32;
+  --vf-color-info: #0069ba;
+  --vf-color-warn: #9f8400;
+  --vf-color-help: #7245ae;
+  --vf-color-danger: #c72e39;
+  --vf-color-contrast: #252526;
+  --vf-radius-control: 0.75rem;
+  --vf-radius-control-tight: 0.5rem;
+  --vf-radius-surface: 1rem;
+  --vf-font-size-sm: 0.875rem;
+  --vf-line-height-normal: 1.5;
+  --vf-text-body-font-weight: 400;
+  --vf-font-weight-semibold: 600;
+  --vf-prose-code-block-padding: 0.75rem 1rem;
   box-sizing: border-box;
   min-height: 100vh;
   padding: 48px 20px;
@@ -66,6 +82,19 @@ const toggleTheme = () => {
 }
 
 .demo-page[data-theme="dark"] {
+  --vf-color-bg: #1e1e1e;
+  --vf-color-surface: #252526;
+  --vf-color-surface-muted: #2d2d30;
+  --vf-color-text: #d4d4d4;
+  --vf-color-muted: #9da0a6;
+  --vf-color-border: #3c3c3c;
+  --vf-color-primary: #2f7fd6;
+  --vf-color-success: #3f8746;
+  --vf-color-info: #1f76be;
+  --vf-color-warn: #c6a25f;
+  --vf-color-help: #8553a1;
+  --vf-color-danger: #bf3f3f;
+  --vf-color-contrast: #d7d7d7;
   background:
     radial-gradient(circle at top, rgba(56, 189, 248, 0.18), transparent 30%),
     linear-gradient(180deg, #020617 0%, #111827 100%);
@@ -136,6 +165,5 @@ const toggleTheme = () => {
 :deep(.vcb) {
   max-width: 760px;
   margin: 0 auto;
-  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.16);
 }
 </style>

@@ -122,6 +122,13 @@ Main CSS custom properties:
 - `--vcb-background-color`
 - `--vcb-text-color`
 - `--vcb-border-color`
+- `--vcb-border-radius`
+- `--vcb-header-background-color`
+- `--vcb-header-border-color`
+- `--vcb-header-padding`
+- `--vcb-code-background-color`
+- `--vcb-action-background-color`
+- `--vcb-action-border-color`
 - `--vcb-padding`
 - `--vcb-font-size`
 - `--vcb-line-height`
@@ -142,6 +149,13 @@ Example:
   --vcb-token-keyword-color: #d8b4fe;
 }
 ```
+
+The default styles are tuned to feel closer to a documentation surface:
+
+- the outer container stays close to the page background
+- separation comes mostly from border and header chrome
+- the code area does not introduce a heavy extra panel by default
+- light and dark themes follow the same surface logic
 
 ## Notes
 
