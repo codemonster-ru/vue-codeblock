@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.2] - 2026-04-28
+
+### Fixed
+
+- Reset internal `pre` border and radius styles so `CodeBlock` remains stable inside external prose containers
+
 ## [1.1.1] - 2026-04-05
 
 ### Changed

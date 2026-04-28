@@ -305,8 +305,10 @@ onBeforeUnmount(() => {
   opacity: var(--vcb-action-opacity, 0.88);
 }
 
-.vcb__pre {
+.vcb .vcb__pre {
   margin: 0;
+  border: 0;
+  border-radius: 0;
   padding: var(
     --vcb-padding,
     var(--vf-prose-code-block-padding, 0.75rem 0.9rem)
