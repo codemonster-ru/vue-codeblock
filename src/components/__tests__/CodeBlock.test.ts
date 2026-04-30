@@ -1,6 +1,8 @@
 import { mount } from "@vue/test-utils";
 import type { VueWrapper } from "@vue/test-utils";
 import { renderToString } from "@vue/server-renderer";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { createSSRApp, h, nextTick } from "vue";
 import { vi } from "vitest";
 import CodeBlock from "../CodeBlock.vue";
@@ -247,6 +249,17 @@ body {
     expect(html).toContain("vcb__shiki-token");
     expect(html).toContain("const");
     expect(html).toContain("value");
+  });
+
+  it("defines root block margins with spacing CSS variables", () => {
+    const source = readFileSync(resolve(__dirname, "../CodeBlock.vue"), "utf8");
+
+    expect(source).toContain("margin-block:");
+    expect(source).toContain("--vcb-margin-block-start");
+    expect(source).toContain("--vcb-margin-block-end");
+    expect(source).toContain("--vcb-margin-block, 1rem");
+    expect(source).toContain(".vcb:first-child");
+    expect(source).toContain(".vcb:last-child");
   });
 
   it("emits copy with raw code payload", async () => {

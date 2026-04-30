@@ -244,6 +244,9 @@ onBeforeUnmount(() => {
 .vcb {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
+  margin-block:
+    var(--vcb-margin-block-start, var(--vcb-margin-block, 1rem))
+    var(--vcb-margin-block-end, var(--vcb-margin-block, 1rem));
   gap: var(--vcb-gap, 0);
   border: 1px solid
     var(
@@ -280,6 +283,14 @@ onBeforeUnmount(() => {
   font-size: var(--vcb-font-size, var(--vf-font-size-sm, 0.8125rem));
   line-height: var(--vcb-line-height, var(--vf-line-height-normal, 1.5));
   overflow: hidden;
+}
+
+.vcb:first-child {
+  margin-block-start: 0;
+}
+
+.vcb:last-child {
+  margin-block-end: 0;
 }
 
 .vcb__header {

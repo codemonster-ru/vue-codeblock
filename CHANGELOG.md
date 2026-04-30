@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.0.1] - 2026-05-01
+
+### Added
+
+- Configurable root block spacing via `--vcb-margin-block`, `--vcb-margin-block-start`, and `--vcb-margin-block-end`
+- Regression test coverage ensuring margin spacing variables are present on the root `.vcb` styling contract
+
+### Changed
+
+- Applied default external block spacing to `.vcb` so `CodeBlock` behaves like standard prose content in documentation layouts
+- Prevented extra top/bottom spacing when `CodeBlock` is first or last child via `:first-child` and `:last-child` margin resets
+- Updated README style API documentation with the new spacing custom properties and defaults
+
 ## [2.0.0] - 2026-04-30
 
 ### Added

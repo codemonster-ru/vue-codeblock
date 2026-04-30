@@ -133,6 +133,9 @@ Main CSS custom properties:
 - `--vcb-font-size`
 - `--vcb-line-height`
 - `--vcb-line-number-color`
+- `--vcb-margin-block`
+- `--vcb-margin-block-start`
+- `--vcb-margin-block-end`
 
 Example:
 
@@ -140,8 +143,16 @@ Example:
 .docs-surface {
   --vcb-background-color: #081224;
   --vcb-border-color: rgba(96, 165, 250, 0.28);
+  --vcb-margin-block: var(--vf-prose-block-spacing, 1rem);
 }
 ```
+
+By default, `CodeBlock` behaves like standalone prose block content with:
+
+- `margin-block-start: var(--vcb-margin-block-start, var(--vcb-margin-block, 1rem))`
+- `margin-block-end: var(--vcb-margin-block-end, var(--vcb-margin-block, 1rem))`
+- `margin-block-start: 0` when `.vcb:first-child`
+- `margin-block-end: 0` when `.vcb:last-child`
 
 Syntax token colors are provided by Shiki themes:
 

@@ -381,6 +381,7 @@ const toggleTheme = () => {
         :theme="theme"
       />
     </div>
+
   </main>
 </template>
 
@@ -508,4 +509,5 @@ const toggleTheme = () => {
   width: min(100%, 1280px);
   margin: 0 auto;
 }
+
 </style>
