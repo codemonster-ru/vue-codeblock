@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.0.0] - 2026-04-30
+
+### Added
+
+- Shiki-powered syntax highlighting for JavaScript, TypeScript, Vue, HTML, JSON, Bash, CSS, SCSS, and Sass
+- Server-side rendering support for highlighted code via Vue `onServerPrefetch`
+- Exhaustive local demo samples for every supported language value
+- Regression coverage for Shiki highlighting, language aliases, and SSR output
+
+### Changed
+
+- Replaced the built-in regex highlighter with a fine-grained Shiki bundle that only includes supported languages and the `github-light` / `github-dark` themes
+- Made exported highlighter helpers asynchronous: `highlightCodeBlock` and `highlightCodeLine` now return promises
+- Render `plaintext`, `text`, and `txt` as escaped plain text
+- Render plain escaped code immediately on the client while Shiki loads, reducing first-render flicker
+- Lazily load Shiki language grammars on demand
+- Updated package documentation for Shiki, async runtime helpers, supported languages, SSR behavior, and theme behavior
+
+### Removed
+
+- Removed the legacy regex token CSS classes and token color custom properties such as `--vcb-token-keyword-color`
+
 ## [1.1.2] - 2026-04-28
 
 ### Fixed

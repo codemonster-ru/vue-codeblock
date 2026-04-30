@@ -4,7 +4,7 @@
 [![npm downloads](https://img.shields.io/npm/dw/%40codemonster-ru%2Fvue-codeblock)](https://www.npmjs.com/package/@codemonster-ru/vue-codeblock)
 [![license](https://img.shields.io/npm/l/%40codemonster-ru%2Fvue-codeblock)](https://github.com/codemonster-ru/vue-codeblock/blob/main/LICENSE)
 
-Standalone Vue 3 code block component with built-in syntax highlighting, light/dark theme support, copy actions, line numbers, and a small shared highlighting runtime you can also use outside the component.
+Standalone Vue 3 code block component with Shiki-powered syntax highlighting, light/dark theme support, copy actions, and line numbers.
 
 ## Install
 
@@ -64,7 +64,7 @@ import {
   escapeCodeHtml,
 } from "@codemonster-ru/vue-codeblock";
 
-const html = highlightCodeBlock("ts", "const answer = 42;");
+const html = await highlightCodeBlock("ts", "const answer = 42;", "light");
 const escaped = escapeCodeHtml("<Button />");
 ```
 
@@ -132,13 +132,7 @@ Main CSS custom properties:
 - `--vcb-padding`
 - `--vcb-font-size`
 - `--vcb-line-height`
-- `--vcb-token-keyword-color`
-- `--vcb-token-string-color`
-- `--vcb-token-number-color`
-- `--vcb-token-variable-color`
-- `--vcb-token-function-color`
-- `--vcb-token-property-color`
-- `--vcb-token-directive-color`
+- `--vcb-line-number-color`
 
 Example:
 
@@ -146,9 +140,13 @@ Example:
 .docs-surface {
   --vcb-background-color: #081224;
   --vcb-border-color: rgba(96, 165, 250, 0.28);
-  --vcb-token-keyword-color: #d8b4fe;
 }
 ```
+
+Syntax token colors are provided by Shiki themes:
+
+- light mode uses `github-light`
+- dark mode uses `github-dark`
 
 The default styles are tuned to feel closer to a documentation surface:
 
@@ -159,6 +157,6 @@ The default styles are tuned to feel closer to a documentation surface:
 
 ## Notes
 
-- The built-in highlighter is lightweight and regex-based by design.
-- It is tuned for documentation and UI examples, not for full IDE-grade parsing.
-- If you need more languages later, extend the highlighter runtime rather than patching rendered HTML.
+- Highlighting is powered by Shiki and runs asynchronously.
+- `plaintext`, `text`, and `txt` render as escaped plain text.
+- Unsupported language hints safely fall back to escaped plain text.

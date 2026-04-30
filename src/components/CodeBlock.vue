@@ -42,8 +42,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
-import { highlightCodeBlock } from "../services/code-highlight";
+import {
+  computed,
+  onBeforeUnmount,
+  onMounted,
+  onServerPrefetch,
+  ref,
+  watch,
+} from "vue";
+import {
+  highlightCodeLines,
+  renderPlainCodeLines,
+} from "../services/code-highlight";
 import type { CodeBlockCopyPayload, CodeBlockProps } from "../types";
 
 defineOptions({ name: "VcbCodeBlock" });
@@ -74,8 +84,10 @@ const emits = defineEmits<{
 const copied = ref(false);
 const rootElement = ref<HTMLElement | null>(null);
 const inheritedTheme = ref<"light" | "dark">("light");
+const renderedLines = ref<string[]>(renderPlainCodeLines(props.code));
 let copiedTimer: ReturnType<typeof setTimeout> | null = null;
 let themeObserver: MutationObserver | null = null;
+let renderRequestId = 0;
 
 const normalizedCode = computed(() => props.code.replace(/\r\n/g, "\n"));
 const lines = computed(() => {
@@ -86,13 +98,6 @@ const lines = computed(() => {
   return normalizedCode.value.split("\n");
 });
 
-const renderedLines = computed(() =>
-  highlightCodeBlock(
-    props.language,
-    normalizedCode.value,
-    props.highlight,
-  ).split("\n"),
-);
 const resolvedTheme = computed(() =>
   props.theme === "inherit" ? inheritedTheme.value : props.theme,
 );
@@ -129,6 +134,48 @@ const copyCode = async () => {
     }, props.copiedDuration);
   }
 };
+
+const renderHighlight = async (
+  code = normalizedCode.value,
+  language = props.language,
+  highlight = props.highlight,
+  theme = resolvedTheme.value,
+) => {
+  const requestId = (renderRequestId += 1);
+
+  if (!highlight) {
+    renderedLines.value = renderPlainCodeLines(code);
+    return;
+  }
+
+  const hasHighlightedCode = renderedLines.value.some((line) =>
+    line.includes("vcb__shiki-token"),
+  );
+
+  if (!hasHighlightedCode) {
+    renderedLines.value = renderPlainCodeLines(code);
+  }
+
+  const highlightedLines = await highlightCodeLines(
+    language,
+    code,
+    theme,
+    highlight,
+  );
+
+  if (requestId === renderRequestId) {
+    renderedLines.value = highlightedLines;
+  }
+};
+
+onServerPrefetch(() => renderHighlight());
+
+watch(
+  [normalizedCode, () => props.language, () => props.highlight, resolvedTheme],
+  ([code, language, highlight, theme]) =>
+    renderHighlight(code, language, highlight, theme),
+  { immediate: true },
+);
 
 const normalizeThemeValue = (value: string | null) =>
   value === "dark" ? "dark" : "light";
@@ -196,6 +243,7 @@ onBeforeUnmount(() => {
 <style lang="scss">
 .vcb {
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   gap: var(--vcb-gap, 0);
   border: 1px solid
     var(
@@ -307,6 +355,7 @@ onBeforeUnmount(() => {
 
 .vcb .vcb__pre {
   margin: 0;
+  min-height: 0;
   border: 0;
   border-radius: 0;
   padding: var(
@@ -338,62 +387,6 @@ onBeforeUnmount(() => {
 
 .vcb__line-content {
   white-space: inherit;
-}
-
-.vcb__token_keyword {
-  color: var(--vcb-token-keyword-color, var(--vf-color-help, #8553a1));
-}
-
-.vcb__token_string {
-  color: var(--vcb-token-string-color, var(--vf-color-success, #2e7d32));
-}
-
-.vcb__token_number {
-  color: var(--vcb-token-number-color, var(--vf-color-warn, #9f8400));
-}
-
-.vcb__token_comment {
-  color: var(--vcb-token-comment-color, var(--vf-color-muted, #616773));
-}
-
-.vcb__token_variable {
-  color: var(--vcb-token-variable-color, var(--vf-color-text, #1f232b));
-}
-
-.vcb__token_identifier {
-  color: var(--vcb-token-identifier-color, var(--vf-color-info, #0069ba));
-}
-
-.vcb__token_function {
-  color: var(--vcb-token-function-color, var(--vf-color-primary, #0e639c));
-}
-
-.vcb__token_property {
-  color: var(--vcb-token-property-color, var(--vf-color-primary, #0e639c));
-}
-
-.vcb__token_operator {
-  color: var(--vcb-token-operator-color, var(--vf-color-danger, #c72e39));
-}
-
-.vcb__token_tag {
-  color: var(--vcb-token-tag-color, var(--vf-color-primary, #0e639c));
-}
-
-.vcb__token_selector {
-  color: var(--vcb-token-selector-color, var(--vf-color-primary, #0e639c));
-}
-
-.vcb__token_component {
-  color: var(--vcb-token-component-color, var(--vf-color-info, #0069ba));
-}
-
-.vcb__token_attribute {
-  color: var(--vcb-token-attribute-color, var(--vf-color-help, #8553a1));
-}
-
-.vcb__token_directive {
-  color: var(--vcb-token-directive-color, var(--vf-color-help, #8553a1));
 }
 
 .vcb[data-theme="dark"],
@@ -437,44 +430,6 @@ onBeforeUnmount(() => {
     --vcb-dark-line-number-color,
     var(--vf-color-muted, #9da0a6)
   );
-  --vcb-token-keyword-color: var(
-    --vcb-dark-token-keyword-color,
-    var(--vf-color-help, #c586c0)
-  );
-  --vcb-token-string-color: var(
-    --vcb-dark-token-string-color,
-    var(--vf-color-success, #6a9955)
-  );
-  --vcb-token-number-color: var(
-    --vcb-dark-token-number-color,
-    var(--vf-color-warn, #d7ba7d)
-  );
-  --vcb-token-comment-color: var(--vcb-dark-token-comment-color, #6a9955);
-  --vcb-token-variable-color: var(
-    --vcb-dark-token-variable-color,
-    var(--vf-color-text, #d4d4d4)
-  );
-  --vcb-token-tag-color: var(
-    --vcb-dark-token-tag-color,
-    var(--vf-color-primary, #569cd6)
-  );
-  --vcb-token-selector-color: var(
-    --vcb-dark-token-selector-color,
-    var(--vf-color-warn, #d7ba7d)
-  );
-  --vcb-token-component-color: var(
-    --vcb-dark-token-component-color,
-    var(--vf-color-info, #4ec9b0)
-  );
-  --vcb-token-attribute-color: var(--vcb-dark-token-attribute-color, #9cdcfe);
-  --vcb-token-directive-color: var(--vcb-dark-token-directive-color, #c586c0);
-  --vcb-token-identifier-color: var(--vcb-dark-token-identifier-color, #9cdcfe);
-  --vcb-token-function-color: var(
-    --vcb-dark-token-function-color,
-    var(--vf-color-contrast, #dcdcaa)
-  );
-  --vcb-token-property-color: var(--vcb-dark-token-property-color, #9cdcfe);
-  --vcb-token-operator-color: var(--vcb-dark-token-operator-color, #d4d4d4);
 }
 
 .vcb[data-theme="light"],

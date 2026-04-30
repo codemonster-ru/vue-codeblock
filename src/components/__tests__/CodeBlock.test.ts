@@ -1,11 +1,24 @@
 import { mount } from "@vue/test-utils";
-import { nextTick } from "vue";
+import type { VueWrapper } from "@vue/test-utils";
+import { renderToString } from "@vue/server-renderer";
+import { createSSRApp, h, nextTick } from "vue";
 import { vi } from "vitest";
 import CodeBlock from "../CodeBlock.vue";
 
 const flushObserver = async () => {
   await nextTick();
   await new Promise((resolve) => setTimeout(resolve, 0));
+};
+
+const flushHighlight = async (wrapper: VueWrapper) => {
+  for (let index = 0; index < 20; index += 1) {
+    await nextTick();
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    if (wrapper.findAll(".vcb__shiki-token").length > 0) {
+      return;
+    }
+  }
 };
 
 const mountIntoHost = (
@@ -29,7 +42,7 @@ const mountIntoHost = (
 };
 
 describe("CodeBlock", () => {
-  it("renders highlighted TypeScript content and line numbers", () => {
+  it("renders highlighted TypeScript content and line numbers", async () => {
     const wrapper = mount(CodeBlock, {
       props: {
         language: "ts",
@@ -38,12 +51,38 @@ describe("CodeBlock", () => {
       },
     });
 
+    await flushHighlight(wrapper);
+
     expect(wrapper.findAll(".vcb__line-number")).toHaveLength(2);
-    expect(wrapper.html()).toContain("vcb__token_keyword");
-    expect(wrapper.html()).toContain("vcb__token_number");
+    expect(wrapper.findAll(".vcb__shiki-token").length).toBeGreaterThan(0);
+    expect(wrapper.html()).toContain("style=");
+    expect(wrapper.text()).toContain("const value = 42;");
   });
 
-  it("highlights Vue directives and expressions", () => {
+  it("highlights advanced TypeScript syntax", async () => {
+    const wrapper = mount(CodeBlock, {
+      props: {
+        language: "ts",
+        code: [
+          "interface User { readonly id: number }",
+          "type Nullable<T> = T | null;",
+          "enum State { Ready = 'ready' }",
+          "class Store<T> { private #value?: T }",
+          "const state = 'ready' satisfies State;",
+        ].join("\n"),
+        showHeader: false,
+        copyable: false,
+      },
+    });
+
+    await flushHighlight(wrapper);
+
+    expect(wrapper.html()).toContain("interface");
+    expect(wrapper.findAll(".vcb__shiki-token").length).toBeGreaterThan(0);
+    expect(wrapper.text()).toContain("satisfies");
+  });
+
+  it("highlights Vue directives and expressions", async () => {
     const wrapper = mount(CodeBlock, {
       props: {
         language: "vue",
@@ -61,13 +100,36 @@ describe("CodeBlock", () => {
       },
     });
 
-    expect(wrapper.html()).toContain("vcb__token_directive");
-    expect(wrapper.html()).toContain("vcb__token_operator");
-    expect(wrapper.html()).toContain("vcb__token_function");
-    expect(wrapper.html()).toContain("vcb__token_variable");
+    await flushHighlight(wrapper);
+
+    expect(wrapper.findAll(".vcb__shiki-token").length).toBeGreaterThan(0);
+    expect(wrapper.text()).toContain("v-model");
+    expect(wrapper.text()).toContain("@submit-success");
   });
 
-  it("highlights CSS selectors, properties, values, and numbers", () => {
+  it("highlights shell keywords, variables, flags, and operators", async () => {
+    const wrapper = mount(CodeBlock, {
+      props: {
+        language: "bash",
+        code: [
+          "for file in src/**/*.ts; do",
+          '  if [[ -f "$file" ]]; then',
+          "    echo ${APP_ENV:-development}",
+          "  fi",
+          "done",
+        ].join("\n"),
+        showHeader: false,
+        copyable: false,
+      },
+    });
+
+    await flushHighlight(wrapper);
+
+    expect(wrapper.findAll(".vcb__shiki-token").length).toBeGreaterThan(0);
+    expect(wrapper.text()).toContain("${APP_ENV:-development}");
+  });
+
+  it("highlights CSS selectors, properties, values, and numbers", async () => {
     const wrapper = mount(CodeBlock, {
       props: {
         language: "css",
@@ -88,14 +150,41 @@ body {
       },
     });
 
-    expect(wrapper.html()).toContain("vcb__token_comment");
-    expect(wrapper.html()).toContain("vcb__token_selector");
-    expect(wrapper.html()).toContain("vcb__token_property");
-    expect(wrapper.html()).toContain("vcb__token_number");
-    expect(wrapper.html()).toContain("vcb__token_variable");
+    await flushHighlight(wrapper);
+
+    expect(wrapper.findAll(".vcb__shiki-token").length).toBeGreaterThan(0);
+    expect(wrapper.text()).toContain("--app-page-padding");
   });
 
-  it("highlights npm run scripts in bash blocks", () => {
+  it("highlights CSS at-rules and Sass directives", async () => {
+    const wrapper = mount(CodeBlock, {
+      props: {
+        language: "scss",
+        code: [
+          "$brand: #0e639c;",
+          "@mixin focus-ring($color: $brand) {",
+          "  outline: 2px solid rgba($color, 0.45);",
+          "}",
+          "@media (prefers-color-scheme: dark) {",
+          "  .toolbar,",
+          "  &:focus-visible {",
+          "    @include focus-ring;",
+          "  }",
+          "}",
+        ].join("\n"),
+        showHeader: false,
+        copyable: false,
+      },
+    });
+
+    await flushHighlight(wrapper);
+
+    expect(wrapper.findAll(".vcb__shiki-token").length).toBeGreaterThan(0);
+    expect(wrapper.text()).toContain("@mixin");
+    expect(wrapper.text()).toContain("@include");
+  });
+
+  it("highlights npm run scripts in bash blocks", async () => {
     const wrapper = mount(CodeBlock, {
       props: {
         language: "bash",
@@ -105,12 +194,13 @@ body {
       },
     });
 
-    expect(wrapper.html()).toContain("vcb__token_keyword");
-    expect(wrapper.html()).toContain("vcb__token_function");
-    expect(wrapper.html()).toContain("vcb__token_variable");
+    await flushHighlight(wrapper);
+
+    expect(wrapper.findAll(".vcb__shiki-token").length).toBeGreaterThan(0);
+    expect(wrapper.text()).toContain("npm run verify:bundle-size");
   });
 
-  it("highlights npm install subcommands and scoped packages in bash blocks", () => {
+  it("highlights npm install subcommands and scoped packages in bash blocks", async () => {
     const wrapper = mount(CodeBlock, {
       props: {
         language: "bash",
@@ -120,9 +210,43 @@ body {
       },
     });
 
-    expect(wrapper.html()).toContain("vcb__token_keyword");
-    expect(wrapper.html()).toContain("vcb__token_function");
-    expect(wrapper.html()).toContain("vcb__token_string");
+    await flushHighlight(wrapper);
+
+    expect(wrapper.findAll(".vcb__shiki-token").length).toBeGreaterThan(0);
+    expect(wrapper.text()).toContain("@codemonster-ru/vueforge");
+  });
+
+  it("highlights shell aliases with Shiki", async () => {
+    const wrapper = mount(CodeBlock, {
+      props: {
+        language: "sh",
+        code: "echo $SHELL",
+        showHeader: false,
+        copyable: false,
+      },
+    });
+
+    await flushHighlight(wrapper);
+
+    expect(wrapper.findAll(".vcb__shiki-token").length).toBeGreaterThan(0);
+    expect(wrapper.text()).toContain("echo $SHELL");
+  });
+
+  it("renders highlighted code during SSR", async () => {
+    const app = createSSRApp(() =>
+      h(CodeBlock, {
+        code: "const value = 42;",
+        language: "ts",
+        theme: "dark",
+        showHeader: false,
+        copyable: false,
+      }),
+    );
+    const html = await renderToString(app);
+
+    expect(html).toContain("vcb__shiki-token");
+    expect(html).toContain("const");
+    expect(html).toContain("value");
   });
 
   it("emits copy with raw code payload", async () => {
