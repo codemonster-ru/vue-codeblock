@@ -19,7 +19,7 @@
           type="button"
           class="vcb__copy"
           :disabled="disabled"
-          @click="copyCode"
+          @click="copyCurrentCode"
         >
           {{ copied ? copiedLabel : copyLabel }}
         </button>
@@ -112,7 +112,7 @@ const preStyle = computed(() => {
   };
 });
 
-const copyCode = async () => {
+const copyCurrentCode = async () => {
   if (props.disabled) {
     return;
   }
@@ -242,46 +242,64 @@ onBeforeUnmount(() => {
 
 <style lang="scss">
 .vcb {
+  --vcb-margin-block: 1rem;
+  --vcb-margin-block-start: var(--vcb-margin-block);
+  --vcb-margin-block-end: var(--vcb-margin-block);
+  --vcb-gap: 0;
+  --vcb-border-color: color-mix(in srgb, rgba(15, 23, 42, 0.12) 92%, #cbd5e1);
+  --vcb-border-radius: 0.625rem;
+  --vcb-background-color: #ffffff;
+  --vcb-text-color: #1f232b;
+  --vcb-font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  --vcb-font-size: 0.8125rem;
+  --vcb-line-height: 1.5;
+  --vcb-header-gap: 0.75rem;
+  --vcb-header-padding: 0.4rem 0.75rem;
+  --vcb-header-border-color: color-mix(
+    in srgb,
+    rgba(15, 23, 42, 0.12) 78%,
+    transparent
+  );
+  --vcb-header-background-color: var(--vcb-background-color);
+  --vcb-header-opacity: 0.9;
+  --vcb-meta-gap: 0.55rem;
+  --vcb-meta-color: #616773;
+  --vcb-meta-font-size: 0.75rem;
+  --vcb-filename-color: #1f232b;
+  --vcb-filename-font-weight: 600;
+  --vcb-actions-gap: 0.45rem;
+  --vcb-action-border-color: color-mix(
+    in srgb,
+    rgba(15, 23, 42, 0.12) 80%,
+    transparent
+  );
+  --vcb-action-border-radius: 0.375rem;
+  --vcb-action-background-color: #ffffff;
+  --vcb-action-text-color: #1f232b;
+  --vcb-action-font-size: 0.75rem;
+  --vcb-action-padding: 0.125rem 0.5rem;
+  --vcb-action-font-weight: 400;
+  --vcb-action-opacity: 0.88;
+  --vcb-padding: 0.75rem 0.9rem;
+  --vcb-code-background-color: transparent;
+  --vcb-line-gap: 0.7rem;
+  --vcb-line-number-color: #616773;
+  --vcb-line-number-min-width: 1ch;
+  --vcb-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --vcb-disabled-opacity: 0.6;
+
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  margin-block:
-    var(--vcb-margin-block-start, var(--vcb-margin-block, 1rem))
-    var(--vcb-margin-block-end, var(--vcb-margin-block, 1rem));
-  gap: var(--vcb-gap, 0);
-  border: 1px solid
-    var(
-      --vcb-border-color,
-      color-mix(
-        in srgb,
-        var(--vf-color-border, rgba(15, 23, 42, 0.12)) 92%,
-        #cbd5e1
-      )
-    );
-  border-radius: var(
-    --vcb-border-radius,
-    var(
-      --vf-radius-control,
-      var(--vf-radius-surface, var(--vf-radius, 0.625rem))
-    )
-  );
-  background: var(--vcb-background-color, var(--vf-color-bg, #ffffff));
-  color: var(--vcb-text-color, var(--vf-color-text, #1f232b));
-  font-family: var(
-    --vcb-font-family,
-    var(
-      --vf-font-family-mono,
-      ui-monospace,
-      SFMono-Regular,
-      Menlo,
-      Monaco,
-      Consolas,
-      "Liberation Mono",
-      "Courier New",
-      monospace
-    )
-  );
-  font-size: var(--vcb-font-size, var(--vf-font-size-sm, 0.8125rem));
-  line-height: var(--vcb-line-height, var(--vf-line-height-normal, 1.5));
+  margin-block: var(--vcb-margin-block-start) var(--vcb-margin-block-end);
+  gap: var(--vcb-gap);
+  border: 1px solid var(--vcb-border-color);
+  border-radius: var(--vcb-border-radius);
+  background: var(--vcb-background-color);
+  color: var(--vcb-text-color);
+  font-family: var(--vcb-font-family);
+  font-size: var(--vcb-font-size);
+  line-height: var(--vcb-line-height);
   overflow: hidden;
 }
 
@@ -297,71 +315,43 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--vcb-header-gap, 0.75rem);
+  gap: var(--vcb-header-gap);
   min-height: 0;
-  padding: var(--vcb-header-padding, 0.4rem 0.75rem);
-  border-bottom: 1px solid
-    var(
-      --vcb-header-border-color,
-      color-mix(
-        in srgb,
-        var(--vf-color-border, rgba(15, 23, 42, 0.12)) 78%,
-        transparent
-      )
-    );
-  background: var(
-    --vcb-header-background-color,
-    var(--vcb-background-color, var(--vf-color-bg, #ffffff))
-  );
-  opacity: var(--vcb-header-opacity, 0.9);
+  padding: var(--vcb-header-padding);
+  border-bottom: 1px solid var(--vcb-header-border-color);
+  background: var(--vcb-header-background-color);
+  opacity: var(--vcb-header-opacity);
 }
 
 .vcb__meta {
   display: inline-flex;
   align-items: center;
-  gap: var(--vcb-meta-gap, 0.55rem);
-  color: var(--vcb-meta-color, var(--vf-color-muted, #616773));
-  font-size: var(--vcb-meta-font-size, var(--vf-font-size-sm, 0.75rem));
+  gap: var(--vcb-meta-gap);
+  color: var(--vcb-meta-color);
+  font-size: var(--vcb-meta-font-size);
   letter-spacing: 0;
 }
 
 .vcb__filename {
-  color: var(--vcb-filename-color, var(--vf-color-text, #1f232b));
-  font-weight: var(
-    --vcb-filename-font-weight,
-    var(--vf-font-weight-semibold, 600)
-  );
+  color: var(--vcb-filename-color);
+  font-weight: var(--vcb-filename-font-weight);
 }
 
 .vcb__actions {
   display: inline-flex;
   align-items: center;
-  gap: var(--vcb-actions-gap, 0.45rem);
+  gap: var(--vcb-actions-gap);
 }
 
 .vcb__copy {
-  border: 1px solid
-    var(
-      --vcb-action-border-color,
-      color-mix(
-        in srgb,
-        var(--vf-color-border, rgba(15, 23, 42, 0.12)) 80%,
-        transparent
-      )
-    );
-  border-radius: var(
-    --vcb-action-border-radius,
-    var(--vf-radius-control-tight, 0.375rem)
-  );
-  background: var(--vcb-action-background-color, var(--vf-color-bg, #ffffff));
-  color: var(--vcb-action-text-color, var(--vf-color-text, #1f232b));
-  padding: var(--vcb-action-padding, 0.125rem 0.5rem);
-  font-size: var(--vcb-action-font-size, var(--vf-font-size-sm, 0.75rem));
-  font-weight: var(
-    --vcb-action-font-weight,
-    var(--vf-text-body-font-weight, 400)
-  );
-  opacity: var(--vcb-action-opacity, 0.88);
+  border: 1px solid var(--vcb-action-border-color);
+  border-radius: var(--vcb-action-border-radius);
+  background: var(--vcb-action-background-color);
+  color: var(--vcb-action-text-color);
+  padding: var(--vcb-action-padding);
+  font-size: var(--vcb-action-font-size);
+  font-weight: var(--vcb-action-font-weight);
+  opacity: var(--vcb-action-opacity);
 }
 
 .vcb .vcb__pre {
@@ -369,11 +359,8 @@ onBeforeUnmount(() => {
   min-height: 0;
   border: 0;
   border-radius: 0;
-  padding: var(
-    --vcb-padding,
-    var(--vf-prose-code-block-padding, 0.75rem 0.9rem)
-  );
-  background: var(--vcb-code-background-color, transparent);
+  padding: var(--vcb-padding);
+  background: var(--vcb-code-background-color);
   overflow: auto;
   white-space: pre;
 }
@@ -386,13 +373,14 @@ onBeforeUnmount(() => {
 .vcb__line {
   display: flex;
   align-items: baseline;
-  gap: var(--vcb-line-gap, 0.7rem);
+  gap: var(--vcb-line-gap);
 }
 
 .vcb__line-number {
   text-align: right;
-  color: var(--vcb-line-number-color, var(--vf-color-muted, #616773));
-  min-width: var(--vcb-line-number-min-width, 2.1rem);
+  color: var(--vcb-line-number-color);
+  min-width: var(--vcb-line-number-min-width);
+  font-variant-numeric: tabular-nums;
   user-select: none;
 }
 
@@ -403,44 +391,29 @@ onBeforeUnmount(() => {
 .vcb[data-theme="dark"],
 :root[data-theme="dark"] .vcb:not([data-theme="light"]),
 [data-theme="dark"] .vcb:not([data-theme="light"]) {
-  --vcb-background-color: var(
-    --vcb-dark-background-color,
-    var(--vf-color-bg, #1e1e1e)
-  );
-  --vcb-text-color: var(--vcb-dark-text-color, var(--vf-color-text, #d4d4d4));
+  --vcb-background-color: var(--vcb-dark-background-color, #1e1e1e);
+  --vcb-text-color: var(--vcb-dark-text-color, #d4d4d4);
   --vcb-border-color: var(
     --vcb-dark-border-color,
-    color-mix(in srgb, var(--vf-color-border, #3c3c3c) 88%, black)
+    color-mix(in srgb, #3c3c3c 88%, black)
   );
   --vcb-header-border-color: var(
     --vcb-dark-header-border-color,
-    color-mix(in srgb, var(--vf-color-border, #3c3c3c) 72%, transparent)
+    color-mix(in srgb, #3c3c3c 72%, transparent)
   );
-  --vcb-header-background-color: var(
-    --vcb-dark-header-background-color,
-    transparent
-  );
-  --vcb-meta-color: var(--vcb-dark-meta-color, var(--vf-color-muted, #9da0a6));
-  --vcb-filename-color: var(
-    --vcb-dark-filename-color,
-    var(--vf-color-text, #d4d4d4)
-  );
+  --vcb-header-background-color: var(--vcb-dark-header-background-color, transparent);
+  --vcb-meta-color: var(--vcb-dark-meta-color, #9da0a6);
+  --vcb-filename-color: var(--vcb-dark-filename-color, #d4d4d4);
   --vcb-action-border-color: var(
     --vcb-dark-action-border-color,
-    color-mix(in srgb, var(--vf-color-border, #3c3c3c) 76%, transparent)
+    color-mix(in srgb, #3c3c3c 76%, transparent)
   );
   --vcb-action-background-color: var(
     --vcb-dark-action-background-color,
-    color-mix(in srgb, var(--vf-color-surface, #252526) 72%, transparent)
+    color-mix(in srgb, #252526 72%, transparent)
   );
-  --vcb-action-text-color: var(
-    --vcb-dark-action-text-color,
-    var(--vf-color-text, #d4d4d4)
-  );
-  --vcb-line-number-color: var(
-    --vcb-dark-line-number-color,
-    var(--vf-color-muted, #9da0a6)
-  );
+  --vcb-action-text-color: var(--vcb-dark-action-text-color, #d4d4d4);
+  --vcb-line-number-color: var(--vcb-dark-line-number-color, #9da0a6);
 }
 
 .vcb[data-theme="light"],
@@ -448,10 +421,10 @@ onBeforeUnmount(() => {
 [data-theme="light"] .vcb,
 [data-vf-theme="light"] .vcb,
 :root:not([data-vf-theme="dark"]) .vcb:not([data-theme="dark"]) {
-  box-shadow: var(--vcb-shadow, 0 1px 2px rgba(15, 23, 42, 0.04));
+  box-shadow: var(--vcb-shadow);
 }
 
 .vcb_disabled {
-  opacity: var(--vcb-disabled-opacity, 0.6);
+  opacity: var(--vcb-disabled-opacity);
 }
 </style>

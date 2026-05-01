@@ -1,5 +1,23 @@
 # Changelog
 
+## [2.1.0] - 2026-05-01
+
+### Added
+
+- Runtime theme configuration API for plugin install via `themeVars`, `themeScope`, and `styleNonce`
+- Public `setCodeBlockThemeVars(...)` helper for dynamic runtime token updates
+- Plugin-level tests for scoped token injection, CSP nonce support, and SSR-safe runtime behavior
+
+### Changed
+
+- Simplified demo showcase to a minimal visual verification surface with theme switch and full language coverage
+- Reworked default styling tokens to be self-contained (`--vcb-*`) while keeping VueForge-like defaults
+- Tightened default line-number column behavior for more compact short snippets
+
+### Removed
+
+- Removed `playground` mode and all related props/types/tests from `vue-codeblock`
+
 ## [2.0.1] - 2026-05-01
 
 ### Added

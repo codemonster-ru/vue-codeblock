@@ -31,6 +31,29 @@ import VueCodeBlock from "@codemonster-ru/vue-codeblock";
 createApp(App).use(VueCodeBlock).mount("#app");
 ```
 
+Register the plugin with runtime theme variables:
+
+```ts
+createApp(App)
+  .use(VueCodeBlock, {
+    themeScope: ":root",
+    styleNonce: "nonce-from-csp",
+    themeVars: {
+      base: {
+        "--vcb-border-radius": "0.75rem",
+        "--vcb-padding": "0.75rem 1rem",
+      },
+      light: {
+        "--vcb-background-color": "#ffffff",
+      },
+      dark: {
+        "--vcb-dark-background-color": "#1f2430",
+      },
+    },
+  })
+  .mount("#app");
+```
+
 Or import the component directly:
 
 ```vue
@@ -137,20 +160,46 @@ Main CSS custom properties:
 - `--vcb-margin-block-start`
 - `--vcb-margin-block-end`
 
+You can also provide these variables at plugin install time via `themeVars`:
+
+- `themeVars.base` is applied to `:root`
+- `themeVars.light` is applied to `:root[data-theme="light"]` and `:root[data-vf-theme="light"]`
+- `themeVars.dark` is applied to `:root[data-theme="dark"]` and `:root[data-vf-theme="dark"]`
+
+Optional plugin option:
+
+- `themeScope` (`string`, default `:root`) controls where runtime variables are injected.
+- `styleNonce` adds a CSP nonce to the runtime `<style>` tag.
+
+For dynamic runtime updates after app initialization, use:
+
+```ts
+import { setCodeBlockThemeVars } from "@codemonster-ru/vue-codeblock";
+
+setCodeBlockThemeVars(
+  {
+    dark: {
+      "--vcb-dark-background-color": "#181c25",
+    },
+  },
+  { themeScope: ":root" },
+);
+```
+
 Example:
 
 ```css
 .docs-surface {
   --vcb-background-color: #081224;
   --vcb-border-color: rgba(96, 165, 250, 0.28);
-  --vcb-margin-block: var(--vf-prose-block-spacing, 1rem);
+  --vcb-margin-block: 1rem;
 }
 ```
 
 By default, `CodeBlock` behaves like standalone prose block content with:
 
-- `margin-block-start: var(--vcb-margin-block-start, var(--vcb-margin-block, 1rem))`
-- `margin-block-end: var(--vcb-margin-block-end, var(--vcb-margin-block, 1rem))`
+- `margin-block-start: var(--vcb-margin-block-start)` where `--vcb-margin-block-start` defaults to `--vcb-margin-block`
+- `margin-block-end: var(--vcb-margin-block-end)` where `--vcb-margin-block-end` defaults to `--vcb-margin-block`
 - `margin-block-start: 0` when `.vcb:first-child`
 - `margin-block-end: 0` when `.vcb:last-child`
 

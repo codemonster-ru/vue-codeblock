@@ -257,7 +257,7 @@ body {
     expect(source).toContain("margin-block:");
     expect(source).toContain("--vcb-margin-block-start");
     expect(source).toContain("--vcb-margin-block-end");
-    expect(source).toContain("--vcb-margin-block, 1rem");
+    expect(source).toContain("--vcb-margin-block: 1rem");
     expect(source).toContain(".vcb:first-child");
     expect(source).toContain(".vcb:last-child");
   });
@@ -361,4 +361,20 @@ body {
     expect(wrapper.attributes("data-theme")).toBe("light");
     wrapper.unmount();
   });
+
+  it("keeps classic code mode behavior by default", async () => {
+    const wrapper = mount(CodeBlock, {
+      props: {
+        code: "const fallback = true;",
+        language: "ts",
+      },
+    });
+
+    await flushHighlight(wrapper);
+
+    expect(wrapper.findAll(".vcb__tab")).toHaveLength(0);
+    expect(wrapper.find(".vcb__pre").exists()).toBe(true);
+    expect(wrapper.text()).toContain("Language: ts");
+  });
+
 });

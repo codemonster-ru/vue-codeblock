@@ -1,6 +1,6 @@
 {
   "name": "@codemonster-ru/vue-codeblock",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Standalone Vue code block component with syntax highlighting and light/dark theming.",
   "license": "MIT",
   "author": "Kirill Kolesnikov",
@@ -58,6 +58,8 @@
     "vue": "^3.4.0"
   },
   "devDependencies": {
+    "@codemonster-ru/vueforge-core": "^1.17.4",
+    "@codemonster-ru/vueforge-layouts": "^1.10.0",
     "@types/node": "^24.3.1",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vue/test-utils": "^2.4.6",

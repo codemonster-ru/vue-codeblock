@@ -28,6 +28,21 @@ export interface CodeBlockCopyPayload {
   text: string;
 }
 
+export type CodeBlockCssVarValue = string | number;
+export type CodeBlockCssVarMap = Record<string, CodeBlockCssVarValue>;
+
+export interface CodeBlockThemeVarOptions {
+  base?: CodeBlockCssVarMap;
+  light?: CodeBlockCssVarMap;
+  dark?: CodeBlockCssVarMap;
+}
+
+export interface CodeBlockPluginOptions {
+  themeVars?: CodeBlockThemeVarOptions;
+  themeScope?: string;
+  styleNonce?: string;
+}
+
 export interface CodeBlockProps {
   code?: string;
   language?: CodeBlockLanguage;
