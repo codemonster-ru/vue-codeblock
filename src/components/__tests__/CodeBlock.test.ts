@@ -280,6 +280,25 @@ body {
     vi.unstubAllGlobals();
   });
 
+  it("keeps copy action available when header is hidden", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal("navigator", { clipboard: { writeText } });
+
+    const wrapper = mount(CodeBlock, {
+      props: {
+        code: "const hiddenHeader = true;",
+        showHeader: false,
+        copyable: true,
+      },
+    });
+
+    expect(wrapper.find(".vcb__header").exists()).toBe(false);
+    await wrapper.get(".vcb__copy").trigger("click");
+    expect(writeText).toHaveBeenCalledWith("const hiddenHeader = true;");
+
+    vi.unstubAllGlobals();
+  });
+
   it("inherits dark theme from the closest data-theme ancestor", async () => {
     const { wrapper } = mountIntoHost(
       {

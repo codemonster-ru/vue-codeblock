@@ -3,6 +3,12 @@ import { VfThemeSwitch, useTheme } from "@codemonster-ru/vueforge-core";
 import { CodeBlock } from "../index";
 
 const { resolvedTheme } = useTheme();
+const longSnippetLineCount = 1000;
+const longTsSnippet = Array.from({ length: longSnippetLineCount }, (_, index) => {
+  const line = index + 1;
+
+  return `const row${line.toString().padStart(4, "0")} = { id: ${line}, title: "Item ${line}" };`;
+}).join("\n");
 
 const snippets = {
   plain: [
@@ -41,6 +47,12 @@ const snippets = {
 };
 
 const blocks = [
+  {
+    language: "ts",
+    filename: "long-1000-lines.ts",
+    code: longTsSnippet,
+    maxHeight: "420px",
+  },
   { language: "plaintext", filename: "plain.txt", code: snippets.plain },
   { language: "text", filename: "note.text", code: snippets.plain },
   { language: "txt", filename: "readme.txt", code: snippets.plain },
@@ -74,6 +86,7 @@ const blocks = [
           :language="block.language"
           :filename="block.filename"
           :code="block.code"
+          :max-height="block.maxHeight"
           :theme="resolvedTheme"
           show-line-numbers
         />

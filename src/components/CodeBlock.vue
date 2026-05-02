@@ -14,34 +14,43 @@
       </div>
       <div class="vcb__actions">
         <slot name="actions" />
-        <button
-          v-if="copyable"
-          type="button"
-          class="vcb__copy"
-          :disabled="disabled"
-          @click="copyCurrentCode"
-        >
-          {{ copied ? copiedLabel : copyLabel }}
-        </button>
       </div>
     </header>
 
-    <pre
-      class="vcb__pre"
-      :class="{ vcb__pre_wrap: wrap }"
-      :style="preStyle"
-    ><code><span
-            v-for="(line, index) in lines"
-            :key="index"
-            class="vcb__line"
-        ><span v-if="showLineNumbers" class="vcb__line-number">{{ index + 1 }}</span><span
-                class="vcb__line-content"
-                v-html="renderedLines[index] ?? ''"
-            /></span></code></pre>
+    <div class="vcb__code-shell">
+      <button
+        v-if="copyable"
+        type="button"
+        class="vcb__copy"
+        :disabled="disabled"
+        :aria-label="copied ? copiedLabel : copyLabel"
+        :title="copied ? copiedLabel : copyLabel"
+        @click="copyCurrentCode"
+      >
+        <VueIconify
+          class="vcb__copy-icon"
+          :icon="copied ? icons.check : icons.copy"
+          aria-hidden="true"
+        />
+      </button>
+      <pre
+        class="vcb__pre"
+        :class="{ vcb__pre_wrap: wrap }"
+        :style="preStyle"
+      ><code><span
+              v-for="(line, index) in lines"
+              :key="index"
+              class="vcb__line"
+          ><span v-if="showLineNumbers" class="vcb__line-number">{{ index + 1 }}</span><span
+                  class="vcb__line-content"
+                  v-html="renderedLines[index] ?? ''"
+              /></span></code></pre>
+    </div>
   </section>
 </template>
 
 <script setup lang="ts">
+import { VueIconify, icons } from "@codemonster-ru/vueiconify";
 import {
   computed,
   onBeforeUnmount,
@@ -98,18 +107,26 @@ const lines = computed(() => {
   return normalizedCode.value.split("\n");
 });
 
+const lineNumberWidth = computed(() => {
+  const digitCount = Math.max(1, String(lines.value.length).length);
+
+  return `${digitCount}ch`;
+});
+
 const resolvedTheme = computed(() =>
   props.theme === "inherit" ? inheritedTheme.value : props.theme,
 );
 
 const preStyle = computed(() => {
-  if (!props.maxHeight) {
-    return undefined;
+  const style: Record<string, string> = {};
+
+  style["--vcb-line-number-width"] = lineNumberWidth.value;
+
+  if (props.maxHeight) {
+    style.maxHeight = props.maxHeight;
   }
 
-  return {
-    maxHeight: props.maxHeight,
-  };
+  return style;
 });
 
 const copyCurrentCode = async () => {
@@ -255,7 +272,7 @@ onBeforeUnmount(() => {
   --vcb-font-size: 0.8125rem;
   --vcb-line-height: 1.5;
   --vcb-header-gap: 0.75rem;
-  --vcb-header-padding: 0.4rem 0.75rem;
+  --vcb-header-padding: var(--vcb-padding);
   --vcb-header-border-color: color-mix(
     in srgb,
     rgba(15, 23, 42, 0.12) 78%,
@@ -278,10 +295,22 @@ onBeforeUnmount(() => {
   --vcb-action-background-color: #ffffff;
   --vcb-action-text-color: #1f232b;
   --vcb-action-font-size: 0.75rem;
-  --vcb-action-padding: 0.125rem 0.5rem;
+  --vcb-action-padding: 0.3rem 0.65rem;
   --vcb-action-font-weight: 400;
   --vcb-action-opacity: 0.88;
+  --vcb-copy-color: var(--vcb-line-number-color);
+  --vcb-copy-hover-color: var(--vcb-action-text-color);
+  --vcb-copy-offset: 0.75rem;
+  --vcb-copy-z-index: 1;
+  --vcb-copy-line-height: 1.15;
+  --vcb-copy-icon-size: 1rem;
+  --vcb-copy-hidden-opacity: 0;
+  --vcb-copy-visible-opacity: 1;
+  --vcb-copy-transition-duration: 0.2s;
+  --vcb-copy-color-transition-duration: 0.18s;
+  --vcb-copy-transition-easing: ease;
   --vcb-padding: 0.75rem 0.9rem;
+  --vcb-max-height: min(60vh, 40rem);
   --vcb-code-background-color: transparent;
   --vcb-line-gap: 0.7rem;
   --vcb-line-number-color: #616773;
@@ -344,14 +373,52 @@ onBeforeUnmount(() => {
 }
 
 .vcb__copy {
+  all: unset;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: max-content !important;
+  line-height: var(--vcb-copy-line-height);
+  position: absolute;
+  top: var(--vcb-copy-offset);
+  right: var(--vcb-copy-offset);
+  z-index: var(--vcb-copy-z-index);
   border: 1px solid var(--vcb-action-border-color);
   border-radius: var(--vcb-action-border-radius);
   background: var(--vcb-action-background-color);
-  color: var(--vcb-action-text-color);
-  padding: var(--vcb-action-padding);
+  color: var(--vcb-copy-color);
+  padding: var(--vcb-action-padding) !important;
   font-size: var(--vcb-action-font-size);
   font-weight: var(--vcb-action-font-weight);
-  opacity: var(--vcb-action-opacity);
+  opacity: var(--vcb-copy-hidden-opacity);
+  pointer-events: none;
+  transition:
+    opacity var(--vcb-copy-transition-duration) var(--vcb-copy-transition-easing),
+    color var(--vcb-copy-color-transition-duration)
+      var(--vcb-copy-transition-easing);
+  white-space: nowrap;
+}
+
+.vcb__copy:disabled {
+  cursor: default;
+}
+
+.vcb__copy-icon {
+  display: block;
+  width: var(--vcb-copy-icon-size);
+  height: var(--vcb-copy-icon-size);
+}
+
+.vcb__code-shell {
+  position: relative;
 }
 
 .vcb .vcb__pre {
@@ -361,8 +428,20 @@ onBeforeUnmount(() => {
   border-radius: 0;
   padding: var(--vcb-padding);
   background: var(--vcb-code-background-color);
+  max-height: var(--vcb-max-height);
   overflow: auto;
   white-space: pre;
+}
+
+.vcb .vcb__code-shell:hover .vcb__copy,
+.vcb .vcb__code-shell:focus-within .vcb__copy {
+  opacity: var(--vcb-copy-visible-opacity);
+  pointer-events: auto;
+}
+
+.vcb__copy:hover,
+.vcb .vcb__copy:focus-visible {
+  color: var(--vcb-copy-hover-color);
 }
 
 .vcb__pre_wrap {
@@ -371,20 +450,24 @@ onBeforeUnmount(() => {
 }
 
 .vcb__line {
-  display: flex;
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
   align-items: baseline;
-  gap: var(--vcb-line-gap);
+  column-gap: var(--vcb-line-gap);
 }
 
 .vcb__line-number {
+  width: var(--vcb-line-number-width, var(--vcb-line-number-min-width));
   text-align: right;
   color: var(--vcb-line-number-color);
   min-width: var(--vcb-line-number-min-width);
   font-variant-numeric: tabular-nums;
   user-select: none;
+  white-space: nowrap;
 }
 
 .vcb__line-content {
+  min-width: 0;
   white-space: inherit;
 }
 

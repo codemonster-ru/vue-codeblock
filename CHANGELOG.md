@@ -1,5 +1,26 @@
 # Changelog
 
+## [2.2.0] - 2026-05-02
+
+### Added
+
+- Icon-based copy control using `@codemonster-ru/vueiconify` with semantic `aria-label`/`title` states (`Copy`/`Copied`)
+- Regression test coverage for copy action availability when the header is hidden
+
+### Changed
+
+- Reworked line-number layout for more stable alignment in long code blocks and large line counts
+- Moved copy action overlay to a dedicated code-shell layer so it stays visible while scrolling code content
+- Added default max-height behavior for code content (`--vcb-max-height`) with per-instance override support via `maxHeight`
+- Tokenized additional UI details for the copy control (offsets, opacity states, transition timing, icon sizing, hover color)
+- Improved demo coverage with a dedicated 1000-line snippet and bounded-height long-content scenario
+- Aligned header padding with code area padding for cleaner vertical rhythm
+
+### Fixed
+
+- Removed `<pre>` whitespace artifacts around the overlay copy control
+- Ensured Vitest handles `@codemonster-ru/vueiconify` CSS side-effects via inline dependency configuration
+
 ## [2.1.0] - 2026-05-01
 
 ### Added

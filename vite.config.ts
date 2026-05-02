@@ -17,6 +17,11 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
+    server: {
+      deps: {
+        inline: ["@codemonster-ru/vueiconify"],
+      },
+    },
   },
   build: {
     emptyOutDir: true,
